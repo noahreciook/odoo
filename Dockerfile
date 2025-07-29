@@ -1,6 +1,6 @@
 FROM python:3.10
 
-# Instalar dependencias del sistema
+# Instalar dependencias del sistema necesarias para compilar paquetes
 RUN apt-get update && apt-get install -y \
     git \
     gcc \
@@ -13,21 +13,24 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpq-dev \
     libffi-dev \
+    libssl-dev \
     node-less \
     npm \
     wkhtmltopdf \
     && apt-get clean
 
-# Crear directorio de trabajo
+# Establecer directorio de trabajo
 WORKDIR /odoo
 
-# Copiar dependencias y código
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
+# Copiar todo el proyecto primero
 COPY . .
 
-# Puerto por defecto
+# Actualizar pip y luego instalar dependencias Python
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Exponer el puerto por defecto de Odoo
 EXPOSE 8069
 
+# Comando por defecto para iniciar Odoo
 CMD ["python3", "odoo-bin", "-c", "odoo.conf"]
