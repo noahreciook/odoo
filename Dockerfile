@@ -1,10 +1,13 @@
-FROM python:3.10
+FROM python:3.10-slim
 
-# Instalar dependencias del sistema necesarias para compilar paquetes
+# Evitar prompts interactivos
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instalar dependencias del sistema necesarias para compilar paquetes de Python
 RUN apt-get update && apt-get install -y \
     git \
     gcc \
-    python3-dev \
+    build-essential \
     libxml2-dev \
     libxslt1-dev \
     zlib1g-dev \
@@ -14,23 +17,25 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libffi-dev \
     libssl-dev \
+    python3-dev \
     node-less \
     npm \
     wkhtmltopdf \
     && apt-get clean
 
-# Establecer directorio de trabajo
+# Crear directorio de trabajo
 WORKDIR /odoo
 
-# Copiar todo el proyecto primero
+# Copiar el archivo de dependencias e instalar
+COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar el resto del código
 COPY . .
 
-# Actualizar pip y luego instalar dependencias Python
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
-# Exponer el puerto por defecto de Odoo
+# Exponer el puerto de Odoo
 EXPOSE 8069
 
-# Comando por defecto para iniciar Odoo
+# Comando para iniciar Odoo
 CMD ["python3", "odoo-bin", "-c", "odoo.conf"]
