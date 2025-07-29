@@ -1,34 +1,33 @@
 FROM python:3.10
 
-# Instala dependencias del sistema
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
-    libpq-dev \
     gcc \
+    python3-dev \
     libxml2-dev \
     libxslt1-dev \
     zlib1g-dev \
     libsasl2-dev \
     libldap2-dev \
     libjpeg-dev \
+    libpq-dev \
     libffi-dev \
     node-less \
     npm \
-    && rm -rf /var/lib/apt/lists/*
+    wkhtmltopdf \
+    && apt-get clean
 
-# Instala wkhtmltopdf (reporte PDF)
-RUN apt-get update && apt-get install -y \
-    wkhtmltopdf
+# Crear directorio de trabajo
+WORKDIR /odoo
 
-# Instala dependencias Python
+# Copiar dependencias y código
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Copia el código
-COPY . /odoo
-WORKDIR /odoo
+COPY . .
 
-# Exponer el puerto de Odoo
+# Puerto por defecto
 EXPOSE 8069
 
-CMD ["python3", "odoo/odoo-bin", "-c", "odoo.conf"]
+CMD ["python3", "odoo-bin", "-c", "odoo.conf"]
