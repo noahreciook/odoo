@@ -1,9 +1,8 @@
 FROM python:3.10-slim
 
-# Evitar prompts interactivos
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar dependencias del sistema necesarias para compilar paquetes y ejecutar Odoo
+# Instalar dependencias del sistema necesarias para compilar paquetes
 RUN apt-get update && apt-get install -y \
     gcc \
     build-essential \
@@ -17,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libsasl2-dev \
     libldap2-dev \
     libev-dev \
+    libz-dev \
     node-less \
     npm \
     wkhtmltopdf \
@@ -24,18 +24,18 @@ RUN apt-get update && apt-get install -y \
     curl \
     && apt-get clean
 
-# Crear directorio de trabajo
+# Establecer directorio de trabajo
 WORKDIR /odoo
 
-# Copiar el archivo de dependencias primero
+# Copiar el archivo de requerimientos y luego instalar
 COPY requirements.txt .
 
-# Actualizar pip, instalar Cython primero, luego instalar el resto
+# Actualizar pip e instalar dependencias de Python
 RUN pip install --upgrade pip
-RUN pip install cython
+RUN pip install cython wheel setuptools
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del código fuente de Odoo
+# Copiar el resto del proyecto
 COPY . .
 
 # Exponer el puerto de Odoo
